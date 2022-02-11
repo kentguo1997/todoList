@@ -1,3 +1,4 @@
+// todo.js 就是扮演Model的角色。(Model 是負責管資料的。)
 // Include mongoose 
 const mongoose = require('mongoose')
 

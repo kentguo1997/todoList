@@ -1,3 +1,11 @@
+{{!-- index.js是負責view(瀏覽器畫面呈現)的部分。 在controller中使用res.render() 在指揮 view 去工作--}}
+{{!-- 拿出叫做 index 的樣板 (這個名字的樣板必須要存在),
+把 todos 資料嵌套進去 (這份資料是 model 剛才幫忙做好的) --}}
+{{!-- 我們裝的前端引擎是 Handlebars，所以和 view 有關的操作方法都是由 Handlebars 提供的。同理，如果未來改裝成自己喜歡的前端引擎，就要改成另一套操作方法。 --}}
+
+{{!-- Setting crate button --}}
+<a href="/todos/new ">Create</a>
+
 {{!-- Get todos(array) from app.js('/')'s routing (Show all todos on index page)--}}
 <ul>
   {{#each todos}}

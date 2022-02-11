@@ -1,7 +1,9 @@
+// app.js 就是扮演controller的角色 (Controller 是統一中控台，從程式外部發進來的請求一律交給 controller，由 controller 來進行內部聯繫，也就是負責串連 model 和 view。)
 // Include packages in the file
 const express = require('express')
 const app = express()
 const exphbs = require('express-handlebars')
+const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const Todo = require('./models/todo') // Include Todo model
 const port = 3000
@@ -12,6 +14,11 @@ const port = 3000
 app.engine('hbs', exphbs({ defaultLayout: 'main', extname: '.hbs'}))
 // 開始啟用樣板引擎hbs
 app.set('view engine', 'hbs')
+
+
+// setting body-parser for showing properties of req.body
+app.use(bodyParser.urlencoded({ extended: true }))
+
 
 // setting connection to mongoDB
 mongoose.connect('mongodb://localhost/todo_list')
@@ -30,7 +37,7 @@ db.once('open', () => {
 
 
 // setting routes
-// browse all todos at index
+// browse all todos on index page
 app.get('/', (req, res) => {
   Todo.find()
     .lean()
@@ -39,11 +46,31 @@ app.get('/', (req, res) => {
 })
 
 // 每個用 . 串接的方法都是按順序進行，一個步驟完成以後才會進入下一步，除非遇到錯誤才會跳到 .catch。
-// Todo.find() : 取出 Todo model 裡的所有資料，現在沒有傳入任何參數，所以會撈出整份資料。
+// Todo.find() : 取出 Todo model 裡的所有資料，現在沒有傳入任何參數，所以會撈出整份資料。((這個 Todo 是 model 來的，而 model 又是 Mongoose 提供的，也就是說，Todo 能用的操作方法都來自 Mongoose，以後如果改裝別的資料庫，就會換一套操作方法。))
 // .lean() : 把 Mongoose 的 Model 物件轉換成乾淨的 JavaScript 資料陣列，這裡可以記一個口訣：「撈資料以後想用 res.render()，要先用 .lean() 來處理」。
 // .then() : 到了 .then() 這一步資料(已被lean轉換後的js乾淨資料陣列)會被放進 todos 變數，你就可以用 res.render('index', { todos }) 把資料傳給 index 樣板。這裡 { todos } 是 { todos: todos } 的縮寫。
 // .catch(): 錯誤處理，如果有錯誤的話先把錯誤內容印出來。
 // 補充: 這種有 .then().catch() 出現的實作方法叫做 Promise，是 ES6 之後因應 JavaScript 的非同步特性 (不按順序發生) 而發展出的改良寫法，在這種寫法裡你可以從文件上直接看出明顯的先後順序。(在這個作法出現前，我們通常用 callback 來控制先後順序，就像我們在做 DOM 的事件處理時，一個函式做完以後，再把另一個 callback 函式當成參數傳進來，表示下一個動作。相比起來，以前的 callback 作法就要花點精力才能看出程式碼的執行順序，所以在 ES6 做了改良。)
+
+
+// adding new to-do
+app.get('/todos/new', (req, res) => {
+  return res.render('new')
+})
+
+// CRUD中的C (Create)
+// new.hbs中的form action="/todos" method="POST"的路由
+app.post('/todos', (req, res) => {
+  const name = req.body.name   // 從 req.body 拿出表單裡的 name 資料(這些屬性名稱 (e.g. name) 是跟著 <input> 框籤上的 name 屬性。)
+  return Todo.create({ name: name }) // 呼叫Todo物件, 將括弧中的參數傳入直接新增一筆資料
+    .then(() => res.redirect('/')) // 新增完成後導回首頁
+    .catch(error => console.error(error))
+})
+
+// 取代Todo.create({ name: name })的另一種寫法:
+// const todo = new Todo({ name: name }) 從Todo產生一個實例
+// return todo.save() 將該實例存入資料庫
+// 兩者的意義不太一樣，不過就「新增一筆資料」來說，都會達成相同結果。這裡我們最後選用作法一，因為看起來步驟比較少。後面「編輯資料」時就必須要採用作法二，我們之後再討論。
 
 
 
