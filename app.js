@@ -1,9 +1,16 @@
 // Include packages in the file
 const express = require('express')
 const app = express()
+const exphbs = require('express-handlebars')
 const mongoose = require('mongoose')
 const port = 3000
 
+// setting template engine
+// 建立一個名為hbs的樣板引擎, 並傳入exphbs與相關參數
+// 呼叫 exphbs 的時候，除了設定預設樣板，還多了一組設定 extname: '.hbs'，是指定副檔名為 .hbs，有了這行以後，我們才能把預設的長檔名改寫成短檔名。
+app.engine('hbs', exphbs({ defaultLayout: 'main', extname: '.hbs'}))
+// 開始啟用樣板引擎hbs
+app.set('view engine', 'hbs')
 
 // setting connection to mongoDB
 mongoose.connect('mongodb://localhost/todo_list')
@@ -21,10 +28,9 @@ db.once('open', () => {
 })
 
 
-
 // setting routes
 app.get('/', (req, res) => {
-  res.send('Helo')
+  res.render('index')
 })
 
 
