@@ -1,1 +1,10 @@
-<h2>Helo</h2>
+{{!-- Get todos(array) from app.js('/')'s routing (Show all todos on index page)--}}
+<ul>
+  {{#each todos}}
+  <li>{{this.name}}</li>
+  {{/each}}
+</ul>
+
+
+{{!-- 重點: --}}
+{{!-- 1. {{}} v.s. {{{}}} : 這裡我們用雙花括 {{}} 而不是三花括 {{{}}}。兩者的相別是三花括 {{{}}} 可以解析 HTML 內容，而雙花括 {{}} 會把內容當成單純的字串。 --}}
