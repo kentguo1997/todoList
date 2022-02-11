@@ -1,3 +1,5 @@
+{{!-- 使用者點擊了首頁(Index.js)中的按鈕，導向了/todos/new的路由, 進而執行controller(app.js)內的程式碼(res.render('new')), 將new.js以下寫好的partial template套用在layout(main.js)的畫面呈現於瀏覽器上 --}}
+
 <form action="/todos" method="POST">
   <input type="text" placeholder="name" name="name">
   <button type="submit">Create</button>
@@ -7,3 +9,12 @@
 {{!-- 1. 在 HTML 的 <form> 裡，我們會用 action 屬性來定義表單資料發送的位置，這裡定義的是「用 POST 方法，把資料送給 /todos 位置」，這代表等下我們需要再新增一條 POST /todos 路由來接住這筆表單資料。 --}}
 {{!-- 2. <input> 標籤的 name 屬性，這個 name 屬性很重要，它是 HTTP 傳輸時的資料名稱。這些資料會被放在 HTTP 的 request body 裡，進到 Express.js 以後打包成 req.body
 物件，就能在後續流程中使用 --}}
+
+{{!-- 當使用者填寫完表單後, 按下submit之後的流程如下(步驟3跟4可以併在同一行寫成: Todo.create({ name: name }), 呼叫Todo物件, 將括弧中的參數傳入直接在資料庫新增一筆資料) --}}
+{{!-- 1. 用戶端向 http://localhost:3000/todos 發出 POST
+      2. 位在 http://localhost:3000 的伺服器收到請求，到路由清單裡查找與 POST /todos 相符的路由，執行該路由內的 controller 程式碼
+      3. 把使用者使用者輸入的資料轉給 model，讓 model 新增一個實例物件 todo
+      4. Model 請求資料庫把 todo 存入資料庫
+      5. 資料庫工作後返回結果
+      6. Model 檢查結果是成功或失敗，再回報給 controller
+      7. Controller 確認結果，若資料新增成功，就重新導向首頁 --}}
