@@ -91,7 +91,7 @@ app.get('/todos/:id/edit', (req, res) => {
 // CRUD 的 Update的動作 (暫時使用post來做)
 app.post('/todos/:id/edit', (req, res) => {
   const id = req.params.id
-  const name = req.body.name
+  const name = req.body.name // 使用者新輸入的資料
   
   return Todo.findById(id)
     .then( todo => {
@@ -105,8 +105,7 @@ app.post('/todos/:id/edit', (req, res) => {
 // step 1. 這裡 id 和 name 兩種資料都來自客戶端，id 要從網址上用 req.params.id 拿下來，而 name 要用 req.body.name 從表單拿出來。
 // step 2. Todo.findById(id) 和 todo.save()。接下來的資料操作我們呼叫了以上兩次資料操作方法，這裡要注意，資料操作是由另一台資料庫伺服器幫忙執行的(透過mongoose的語法呼叫mongodb幫忙做事情)！！只要是請別人做的事情，都會有成功/失敗的狀況。重要: 在流程上，我們需要等待資料庫返回執行結果，才能進行下一個動作，所以這裡有兩段的.then()。任一步驟出現失敗，都會跳進錯誤處理。
 // Todo.create() v.s. todo.save() : 前者是操作整份資料，後者是針對單一資料。在「新增資料」時兩種作法都可以，而這次因為搭配的資料操作是 Todo.findById，這個方法只會返回一筆資料，所以後面需要接 todo.save() 針對這一筆資料進行儲存，而非操作整份資料。
-
-
+// 記住是在res.render的時候要使用.lean(), 上述Updete的情況不需要使用(若使用的話, 反而無法執行接下來的todo.save()指令)
 
 
 // show details of every to-do
@@ -126,6 +125,22 @@ app.get('/todos/:id', (req, res) => {
 
 // 3. 這裡撈出來的資料也需要傳給樣板使用，所以要用 lean() 把資料整理乾淨。別忘了我們的口訣：「撈資料以後想用 res.render()，就要先用 .lean()」。
 // 4. 到 .then() 這段拿到資料了，資料會被存在 todo 變數裡，傳給樣板引擎，請 Handlebars 幫忙組裝 detail 頁面。
+
+
+
+// delete any of id 
+app.post('/todos/:id/delete', (req, res) => {
+  const id = req.params.id
+  return Todo.findById(id)
+    .then(todo => todo.remove())
+    .then(() => res.redirect('/'))
+    .catch(error => console.log(error) )
+})
+
+// step 1. 透過 req.params.id 取得網址上的識別碼，用來查詢使用者想刪除的 To-do。
+// step 2. 使用 Todo.findById 查詢資料，資料庫查詢成功以後，會把資料放進 todo。
+// step 3. 用 todo.remove() 刪除這筆資料。
+// step 4. 成功刪除以後，使用 redirect 重新呼叫首頁，此時會重新發送請求給 GET /，進入到另一條路由。 
 
 
 
