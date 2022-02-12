@@ -53,23 +53,6 @@ app.get('/', (req, res) => {
 // .catch(): 錯誤處理，如果有錯誤的話先把錯誤內容印出來。
 // 補充: 這種有 .then().catch() 出現的實作方法叫做 Promise，是 ES6 之後因應 JavaScript 的非同步特性 (不按順序發生) 而發展出的改良寫法，在這種寫法裡你可以從文件上直接看出明顯的先後順序。(在這個作法出現前，我們通常用 callback 來控制先後順序，就像我們在做 DOM 的事件處理時，一個函式做完以後，再把另一個 callback 函式當成參數傳進來，表示下一個動作。相比起來，以前的 callback 作法就要花點精力才能看出程式碼的執行順序，所以在 ES6 做了改良。)
 
-// show details of every to-do
-app.get('/todos/:id', (req, res) => {
-  const id = req.params.id
-  return Todo.findById(id)
-    .lean()
-    .then( todo => res.render('detail', { todo }) )
-    .catch(error => console.log(error))
-    
-})
-
-// 重點:
-// 1. 在路由網址如果用了冒號 :，表示這是一個動態參數，可以用 req.params 取出，這裡我們設定 :id，所以就用 req.params.id 拿到資料。
-// 2. 這次我們要查詢特定一筆 todo 資料，所以我們的 controller 不是用 Todo.find，而是用 Todo.findById——findById 的直接翻譯就是「以 id 去尋找」。(findById是mongoose 內建的模組方法)
-// 3. 這裡撈出來的資料也需要傳給樣板使用，所以要用 lean() 把資料整理乾淨。別忘了我們的口訣：「撈資料以後想用 res.render()，就要先用 .lean()」。
-// 4. 到 .then() 這段拿到資料了，資料會被存在 todo 變數裡，傳給樣板引擎，請 Handlebars 幫忙組裝 detail 頁面。
-
-
 
 // adding new to-do
 app.get('/todos/new', (req, res) => {
@@ -89,6 +72,61 @@ app.post('/todos', (req, res) => {
 // const todo = new Todo({ name: name }) 從Todo產生一個實例
 // return todo.save() 將該實例存入資料庫
 // 兩者的意義不太一樣，不過就「新增一筆資料」來說，都會達成相同結果。這裡我們最後選用作法一，因為看起來步驟比較少。後面「編輯資料」時就必須要採用作法二，我們之後再討論。
+
+
+
+// Edit any of todos
+app.get('/todos/:id/edit', (req, res) => {
+  const id = req.params.id
+  return Todo.findById(id)
+    .lean()
+    .then(todo => res.render('edit', { todo }))
+    .catch(error => console.log(error))
+})
+
+
+// 首先要用 req.params.id 把網址上的 id 截取出來，有了 id 之後，就能使用 Todo.findById() 來查詢資料庫。找出資料以後，因為要傳給前端樣板，記得加上 .lean()。若成功找到資料，就把資料傳給 view 引擎，並且指定使用 edit 樣板，view 引擎就能幫我們組合出「帶有資料的 HTML 樣板」。
+
+
+// CRUD 的 Update的動作 (暫時使用post來做)
+app.post('/todos/:id/edit', (req, res) => {
+  const id = req.params.id
+  const name = req.body.name
+  
+  return Todo.findById(id)
+    .then( todo => {
+      todo.name = name
+      return todo.save()
+    })
+    .then(() => res.redirect(`/todos/${id}`))
+    .catch(error => console.log(error))
+})
+
+// step 1. 這裡 id 和 name 兩種資料都來自客戶端，id 要從網址上用 req.params.id 拿下來，而 name 要用 req.body.name 從表單拿出來。
+// step 2. Todo.findById(id) 和 todo.save()。接下來的資料操作我們呼叫了以上兩次資料操作方法，這裡要注意，資料操作是由另一台資料庫伺服器幫忙執行的(透過mongoose的語法呼叫mongodb幫忙做事情)！！只要是請別人做的事情，都會有成功/失敗的狀況。重要: 在流程上，我們需要等待資料庫返回執行結果，才能進行下一個動作，所以這裡有兩段的.then()。任一步驟出現失敗，都會跳進錯誤處理。
+// Todo.create() v.s. todo.save() : 前者是操作整份資料，後者是針對單一資料。在「新增資料」時兩種作法都可以，而這次因為搭配的資料操作是 Todo.findById，這個方法只會返回一筆資料，所以後面需要接 todo.save() 針對這一筆資料進行儲存，而非操作整份資料。
+
+
+
+
+// show details of every to-do
+app.get('/todos/:id', (req, res) => {
+  const id = req.params.id
+  return Todo.findById(id)
+    .lean()
+    .then(todo => res.render('detail', { todo }))
+    .catch(error => console.log(error))
+})
+
+// 注意: 記得把show details的路由寫在/todos/new(新增功能的程式碼之後, 不然首頁的新增功能的按鈕會壞掉(/todos/new會被當作/todos/:id進去執行裡面的程式碼))
+// 重點:
+// 1. 在路由網址如果用了冒號 :，表示這是一個動態參數，可以用 req.params 取出，這裡我們設定 :id，所以就用 req.params.id 拿到資料。
+// 2. 這次我們要查詢特定一筆 todo 資料，所以我們的 controller 不是用 Todo.find，而是用 Todo.findById——findById 的直接翻譯就是「以 id 去尋找」。(findById是mongoose 內建的模組方法)
+// 注意: findById的方法最後只會回傳資料庫裡符合條件的"那一筆資料"而已(因為資料庫裡的id不會重複)，所以到.then的時候就可以自行設定變數(這裡是設定todo)來存取取出的這筆資料, 然後將設定得參數(todo)代進要渲染的detail.hbs當中
+
+// 3. 這裡撈出來的資料也需要傳給樣板使用，所以要用 lean() 把資料整理乾淨。別忘了我們的口訣：「撈資料以後想用 res.render()，就要先用 .lean()」。
+// 4. 到 .then() 這段拿到資料了，資料會被存在 todo 變數裡，傳給樣板引擎，請 Handlebars 幫忙組裝 detail 頁面。
+
 
 
 

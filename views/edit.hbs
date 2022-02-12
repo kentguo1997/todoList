@@ -1,0 +1,11 @@
+<form action="/todos/{{todo._id}}/edit" method="POST">
+  <input type="text" placeholder="name" name="name" value="{{ todo.name }}">
+  <button type="submit">Save</button>
+</form>
+
+<a href="/">back</a>
+
+
+{{!-- 重點: --}}
+{{!-- 1. edit跟new頁面最大的不同是edit頁面一開始在輸入框裡直接帶入資料內容(value), 讓使用者可以先看到當前該todo的值({{todo.name}}), 再針對該值來進行修改 --}}
+{{!-- 2. 使用者點擊按鈕、提交表單時，根據 <form> 的設定，會以 POST 動作向 /todos/{{todo._id}}/edit 發出請求。之後我們把 PUT 動作設定好以後，路由設定會改成 PUT /todos/{{todo._id}}。 --}}
