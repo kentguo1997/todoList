@@ -5,8 +5,8 @@ const app = express()
 const exphbs = require('express-handlebars')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
+const methodOverride = require('method-override')
 const Todo = require('./models/todo') // Include Todo model
-const todo = require('./models/todo')
 const port = 3000
 
 // setting template engine
@@ -19,6 +19,10 @@ app.set('view engine', 'hbs')
 
 // setting body-parser for showing properties of req.body
 app.use(bodyParser.urlencoded({ extended: true }))
+// setting methodOverride for using PUT & DELETE Method
+app.use(methodOverride('_method'))
+
+// 重點: 記得app.use要放在setting routes之前, 讓它能夠對所有的request進行前置處理(在request跟response之間扮演middleware的角色)，處理好了以後，才讓 request 繼續往下進入特定路由。
 
 
 // setting connection to mongoDB
@@ -90,7 +94,7 @@ app.get('/todos/:id/edit', (req, res) => {
 
 
 // CRUD 的 Update的動作 (暫時使用post來做)
-app.post('/todos/:id/edit', (req, res) => {
+app.put('/todos/:id', (req, res) => {
   const id = req.params.id
 
    // 使用者新輸入的資料 (結構賦值)
@@ -144,7 +148,7 @@ app.get('/todos/:id', (req, res) => {
 
 
 // delete any of id 
-app.post('/todos/:id/delete', (req, res) => {
+app.delete('/todos/:id', (req, res) => {
   const id = req.params.id
   return Todo.findById(id)
     .then(todo => todo.remove())
