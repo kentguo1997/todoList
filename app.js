@@ -91,11 +91,25 @@ app.get('/todos/:id/edit', (req, res) => {
 // CRUD 的 Update的動作 (暫時使用post來做)
 app.post('/todos/:id/edit', (req, res) => {
   const id = req.params.id
-  const name = req.body.name // 使用者新輸入的資料
+
+   // 使用者新輸入的資料 (結構賦值)
+   // 「解構賦值 (destructuring assignment)」:主要就是想要把物件裡的屬性一項項拿出來存成變數時，可以使用的一種縮寫：
+  const { name, isDone } = req.body
   
   return Todo.findById(id)
     .then( todo => {
       todo.name = name
+      todo.isDone = isDone === 'on'
+      // 注意: checkbox的回傳值是由HTML規定的，和直覺想像的 true/false 不太一樣。如果 checkbox 有被打勾，它會被設定為 on; 如果 checkbox 沒有被「打勾」，則它不會帶任何值。
+
+      // 使用 if/else 處理布林值時，多半都可以縮寫，因為條件式本身就回傳布林值。
+      // 上述的語法是說若從req.body表單中取出的資料為true(checkbox===on)則就可以將true值賦值給該筆todo的isDone。這樣的寫法可以取代以下的if/else, 讓程式碼更簡潔。
+      // if (isDone === 'on') {
+      // todo.isDone = true
+      //  } else {
+      // todo.isDone = false
+      // }
+
       return todo.save()
     })
     .then(() => res.redirect(`/todos/${id}`))

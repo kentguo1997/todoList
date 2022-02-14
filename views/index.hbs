@@ -10,6 +10,7 @@
 <ul>
   {{#each todos}}
   <li>
+    <input type="checkbox" name="isDone" {{#if this.isDone}} checked {{/if}} disabled>
     {{this.name}}
     <a href="/todos/{{this._id}}">Detail</a>
     <a href="/todos/{{this._id}}/edit">Edit</a>
@@ -25,3 +26,4 @@
 {{!-- 1. {{}} v.s. {{{}}} : 這裡我們用雙花括 {{}} 而不是三花括 {{{}}}。兩者的相別是三花括 {{{}}} 可以解析 HTML 內容，而雙花括 {{}} 會把內容當成單純的字串。 --}}
 {{!-- 2. 用 {{ this._id }} 來動態捕捉每筆 todo 資料的編號。也就是說實際輸出的網址可能是： /todos/5e9460ebe0174f4a734ce12a。在 Mongoose 裡使用 _id 來表示每筆資料的唯一識別碼，而識別碼的內容是一筆 16 進位的流水號。這個 _id 屬性不需要在 Schema 裡指定，Mongoose 會自動產生。(可在Robo 3T中看到)--}}
 {{!-- 3. 相對於 detail 和 edit 按鈕，我們想用 delete 按鈕發出一個 POST 請求，而 <a> 只能發 GET 請求，所以這裡需要用 <form></form> (注意: 在排版上，<form> 預設是 display: block，也就是會單獨佔滿一排，但我們希望 delete 按鈕能和其他按鈕排在一起，所以再加上了 display: inline)--}}
+{{!-- 4.  我們想要的效果是index 頁面的 checkbox 只能檢視、不能編輯，所以最後加入了 disabled 屬性。--}}
