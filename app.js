@@ -42,6 +42,7 @@ db.once('open', () => {
 app.get('/', (req, res) => {
   Todo.find()
     .lean()
+    .sort({ _id: 'asc' }) //根據每筆資料的_id(資料庫依據資料存入的資料庫的時間先後而幫忙自動產生的)屬性進行升冪排序
     .then(todos => res.render('index', { todos }))
     .catch(error => console.error(error))
 })
