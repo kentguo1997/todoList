@@ -1,20 +1,13 @@
-const mongoose = require('mongoose')
-const Todo = require('../todo') // Include todo model
+// Include mongoose.js for connection to db
+const db = require('../../config/mongoose')
 
-// setting connection to mongoDB
-mongoose.connect('mongodb://localhost/todo_list')
-// getting connection status from database to store in db variable 
-const db = mongoose.connection
+// Include todo model
+const Todo = require('../todo') 
 
-// when database connection's error happens
-db.on('error', () => {
-  console.log('mongodb error!')
-})
 
-// once database connected
+// once database connected 
 db.once('open', () => {
-  console.log('mongodb connected')
-
+  // Create data (the thing that has not defined in mongoose.js)
   for (let i = 0; i < 10; i++) {
     Todo.create({ name: `name-${i}` })  
   }
