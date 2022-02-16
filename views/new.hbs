@@ -1,8 +1,10 @@
 {{!-- 使用者點擊了首頁(Index.js)中的按鈕，導向了/todos/new的路由, 進而執行controller(app.js)內的程式碼(res.render('new')), 將new.js以下寫好的partial template套用在layout(main.js)的畫面呈現於瀏覽器上 --}}
 
-<form action="/todos" method="POST">
-  <input type="text" placeholder="name" name="name">
-  <button type="submit">Create</button>
+<form action="/todos" method="POST" style="display: inline;">
+  <div class="input-group">
+    <input class="form-control" type="text" placeholder="name" name="name">
+    <button class="btn btn-success" type="submit">Create</button>
+  </div>
 </form>
 
 {{!-- 重點: --}}
