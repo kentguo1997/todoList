@@ -4,16 +4,22 @@
 {{!-- 我們裝的前端引擎是 Handlebars，所以和 view 有關的操作方法都是由 Handlebars 提供的。同理，如果未來改裝成自己喜歡的前端引擎，就要改成另一套操作方法。 --}}
 
 {{!-- Get todos(array) from app.js('/')'s routing (Show all todos on index page)--}}
-<ul>
+<ul class="list-group">
   {{#each todos}}
-  <li>
-    <input type="checkbox" name="isDone" {{#if this.isDone}} checked {{/if}} disabled>
-    {{this.name}}
-    <a href="/todos/{{this._id}}">Detail</a>
-    <a href="/todos/{{this._id}}/edit">Edit</a>
-    <form action="/todos/{{this._id}}?_method=DELETE" method="POST" style="display: inline;">
-      <button type="submit">Delete</button>
-    </form>
+  <li class="list-group-item">
+    <div class="row justify-content-between">
+      <div class="col-auto mr-auto">
+        <input style="vertical-align: middle;" type="checkbox" name="isDone" {{#if this.isDone}} checked {{/if}} disabled>
+        <h4 style="display: inline; vertical-align: middle;">{{this.name}}</h4>
+      </div> 
+      <div class="col-auto">
+        <a  class="btn btn-secondary" href="/todos/{{this._id}}">Detail</a>
+        <a  class="btn btn-success" href="/todos/{{this._id}}/edit">Edit</a>
+        <form action="/todos/{{this._id}}?_method=DELETE" method="POST" style="display: inline;">
+          <button class="btn btn-danger" type="submit">Delete</button>
+        </form>
+      </div>  
+    </div>
   </li>
   {{/each}}
 </ul>
