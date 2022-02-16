@@ -7,7 +7,10 @@ const methodOverride = require('method-override')
 
 require('./config/mongoose') // 對 app.js 而言，Mongoose 連線設定只需要「被執行」，不需要接到任何回傳參數繼續利用，所以這裡不需要再設定變數。
 const routes = require('./routes')    // Include routes (index.js) (引入路由器時，路徑設定為 /routes 就會自動去尋找目錄下叫做 index 的檔案。)
-const port = 3000
+
+const PORT = process.env.PORT || 3000
+// 目前我們在本地預設使用 3000 port，但上傳之後，會由 Heroku 自動分配，Heroku 會把 port 的埠號放在環境參數 process.env.PORT 裡。
+
 
 const app = express() // 全部載入後, 執行app這個伺服器
 
@@ -33,8 +36,8 @@ app.use(routes)
 
 
 // start and listen on the server
-app.listen(port, () => {
-  console.log(`The server is listening on http://localhost:${port} `)
+app.listen(PORT, () => {
+  console.log(`The server is listening on http://localhost:${PORT} `)
 })
 
 
