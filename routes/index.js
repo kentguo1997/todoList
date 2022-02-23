@@ -5,7 +5,7 @@ const express = require('express')
 const router = express.Router()
 // Include route modules
 const home = require('./modules/home')
-const todos = require('./modules/todo')
+const todos = require('./modules/todos')
 
 
 // Include routes
