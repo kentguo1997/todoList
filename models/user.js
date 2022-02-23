@@ -19,7 +19,7 @@ const userSchema = new Schema({
     type: String,
     required: true  
   }, 
-  createdAt: {
+  createAt: {
     type: Date,
     default: Date.now
   }
