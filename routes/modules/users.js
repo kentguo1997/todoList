@@ -2,17 +2,29 @@
 const express = require('express')
 const router = express.Router()
 
+// Include Passport
+const passport = require('passport')
+
 // Include userModel
 const User = require('../../models/user')
+
 
 // setting routes
 router.get('/login', (req, res) => {
   res.render('login')
 })
 
-router.post('/login', (req, res) => {
-  
-})
+
+// 使用middleware passport提供的 authenticate 方法執行驗證request的登入狀態
+router.post('/login', passport.authenticate('local', {
+  successRedirect: '/',
+  failureRedirect: '/users/login'
+}))
+
+// 重點: 
+//比起使用function, 使用用 successRedirect 來定義成功登入時呼叫的樣板，讓程式的語義更明顯
+
+
 
 router.get('/register', (req, res) => {
   res.render('register')

@@ -2,6 +2,7 @@
 // Include packages in the file
 const express = require('express')
 const session = require('express-session')
+const usePassport = require('./config/passport') // 匯入Passport設定檔 : 定義userPassport函式 
 const exphbs = require('express-handlebars')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
@@ -39,10 +40,20 @@ app.use(session({
 app.use(bodyParser.urlencoded({ extended: true }))
 // setting methodOverride for using PUT & DELETE Method
 app.use(methodOverride('_method'))
+
+// 重點: 記得bodyParser跟method-override要放在routes之前, 讓它能夠對所有的request進行前置處理(在request跟response之間扮演middleware的角色)，處理好了以後，才讓 request 繼續往下進入特定路由。
+
+
+// use password to do user authentication for login
+usePassport(app)
+
+// 注意: passport.js輸出的是一個函式, 所以使用函式的方法來呼叫它, 並將上面已存取express框架的app伺服器作為必要參數代入
+
+
 // setting routes for all requests
 app.use(routes)
 
-// 重點: 記得bodyParser跟method-override要放在routes之前, 讓它能夠對所有的request進行前置處理(在request跟response之間扮演middleware的角色)，處理好了以後，才讓 request 繼續往下進入特定路由。
+
 
 
 // start and listen on the server
