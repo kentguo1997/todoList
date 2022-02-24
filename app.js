@@ -1,6 +1,7 @@
 // app.js 就是扮演controller的角色 (Controller 是統一中控台，從程式外部發進來的請求一律交給 controller，由 controller 來進行內部聯繫，也就是負責串連 model 和 view。)
 // Include packages in the file
 const express = require('express')
+const session = require('express-session')
 const exphbs = require('express-handlebars')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
@@ -18,13 +19,22 @@ const app = express() // 全部載入後, 執行app這個伺服器
 // setting template engine
 // 建立一個名為hbs的樣板引擎, 並傳入exphbs與相關參數
 // 呼叫 exphbs 的時候，除了設定預設樣板，還多了一組設定 extname: '.hbs'，是指定副檔名為 .hbs，有了這行以後，我們才能把預設的長檔名改寫成短檔名。
-app.engine('hbs', exphbs({ defaultLayout: 'main', extname: '.hbs'}))
+app.engine('hbs', exphbs.engine({ defaultLayout: 'main', extname: '.hbs'}))
 // 開始啟用樣板引擎hbs
 app.set('view engine', 'hbs')
 
 
 
 // app.use設定
+
+// setting express-session to let HTTP protocol become stateful 
+app.use(session({
+  secret: 'ThisIsMySecret',
+  resave: false,
+  saveUninitialized: true
+}))
+
+
 // setting body-parser for showing properties of req.body
 app.use(bodyParser.urlencoded({ extended: true }))
 // setting methodOverride for using PUT & DELETE Method
