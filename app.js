@@ -20,7 +20,7 @@ const app = express() // 全部載入後, 執行app這個伺服器
 // setting template engine
 // 建立一個名為hbs的樣板引擎, 並傳入exphbs與相關參數
 // 呼叫 exphbs 的時候，除了設定預設樣板，還多了一組設定 extname: '.hbs'，是指定副檔名為 .hbs，有了這行以後，我們才能把預設的長檔名改寫成短檔名。
-app.engine('hbs', exphbs.engine({ defaultLayout: 'main', extname: '.hbs'}))
+app.engine('hbs', exphbs({ defaultLayout: 'main', extname: '.hbs'}))
 // 開始啟用樣板引擎hbs
 app.set('view engine', 'hbs')
 
@@ -48,6 +48,24 @@ app.use(methodOverride('_method'))
 usePassport(app)
 
 // 注意: passport.js輸出的是一個函式, 所以使用函式的方法來呼叫它, 並將上面已存取express框架的app伺服器作為必要參數代入
+
+
+// use res.locals to switch nav bar depends on user authentication
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.isAuthenticated
+  res.locals.user = req.user
+  next()
+})
+
+// 重點: (要交接給 res，我們才能在前端樣板裡使用這些資訊。)
+// res.locals.isAuthenticated：把 req.isAuthenticated() 回傳的布林值，交接給 res 使用
+
+// 這個 req.user 是在反序列化的時候，取出的 user 資訊，之後會放在 req.user 裡以供後續使用：https://assets-lighthouse.alphacamp.co/uploads/image/file/12376/ExportedContentImage_01.png
+// res.locals.user：把使用者資料交接給 res 使用
+
+// res.locals：所有樣板都可以使用的變數
+// res.locals 是 Express.js 幫我們開的一條捷徑，放在 res.locals 裡的資料，所有的 view 都可以存取。(之前做 CRUD 時，我們會按 MVC 的分工，每個功能都撈一次資料，然後再把資料傳給 view。但因為「登入的使用者」實在太常用到，直接放進 res.locals 是比較好的選擇。)
+
 
 
 // setting routes for all requests
