@@ -9,7 +9,9 @@ const Todo  = require('../../models/todo')
 
 // Define route of homepage
 router.get('/', (req, res) => {
-  Todo.find()
+  const userId = req.user._id  // 變數設定(Passport會把反序列化後得到的user存在req.user當中)
+  // 只尋找userId等於req.user._id的文件
+  Todo.find({ userId })    // options需要唯一物件, 所以要加上{}
     .lean()
     .sort({ _id: 'asc' }) //根據每筆資料的_id(資料庫依據資料存入的資料庫的時間先後而幫忙自動產生的)屬性進行升冪排序
     .then(todos => res.render('index', { todos }))

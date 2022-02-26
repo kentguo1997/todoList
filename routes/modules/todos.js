@@ -18,8 +18,11 @@ router.get('/new', (req, res) => {
 // CRUD中的C (Create)
 // new.hbs中的form action="/todos" method="POST"的路由
 router.post('/', (req, res) => {
-  const name = req.body.name   // 從 req.body 拿出表單裡的 name 資料(這些屬性名稱 (e.g. name) 是跟著 <input> 框籤上的 name 屬性。)
-  return Todo.create({ name: name }) // 呼叫Todo物件, 將括弧中的參數傳入直接新增一筆資料
+  
+  const name = req.body.name
+  const userId = req.user._id   
+
+  return Todo.create({ name, userId }) 
     .then(() => res.redirect('/')) // 新增完成後導回首頁
     .catch(error => console.error(error))
 })
@@ -34,11 +37,19 @@ router.post('/', (req, res) => {
 
 // Edit any of todos
 router.get('/:id/edit', (req, res) => {
-  const id = req.params.id
-  return Todo.findById(id)
+  const _id = req.params.id
+  const userId = req.user._id 
+
+  return Todo.findOne( {_id, userId} )
     .lean()
     .then(todo => res.render('edit', { todo }))
     .catch(error => console.log(error))
+
+  // 重點: (加入userId 的關聯對應之後)
+
+  // 要把原本的 Todo.findById(id) 改成 Todo.findOne({ _id, userId })，才能串接多個條件。(改用 findOne 之後，Mongoose 就不會自動幫我們轉換 id 和 _id，所以這裡要寫和資料庫一樣的屬性名稱，也就是 _id。)
+  // 邏輯解析: 先找出_id一樣的todo, 確保這筆todo屬於目前登入的user(double check的概念) 這樣就會找出「_id 和網址參數一樣，而且屬於目前登入使用者的 todo」。
+
 })
 
 
@@ -47,13 +58,14 @@ router.get('/:id/edit', (req, res) => {
 
 // CRUD 的 Update的動作 (暫時使用post來做)
 router.put('/:id', (req, res) => {
-  const id = req.params.id
+  const _id = req.params.id
+  const userId = req.user._id 
 
   // 使用者新輸入的資料 (結構賦值)
   // 「解構賦值 (destructuring assignment)」:主要就是想要把物件裡的屬性一項項拿出來存成變數時，可以使用的一種縮寫：
   const { name, isDone } = req.body
 
-  return Todo.findById(id)
+  return Todo.findOne({ _id, userId })
     .then(todo => {
       todo.name = name
       todo.isDone = isDone === 'on'
@@ -69,7 +81,7 @@ router.put('/:id', (req, res) => {
 
       return todo.save()
     })
-    .then(() => res.redirect(`/todos/${id}`))
+    .then(() => res.redirect(`/todos/${_id}`))
     .catch(error => console.log(error))
 })
 
@@ -83,8 +95,10 @@ router.put('/:id', (req, res) => {
 
 // show details of every to-do
 router.get('/:id', (req, res) => {
-  const id = req.params.id
-  return Todo.findById(id)
+  const _id = req.params.id
+  const userId = req.user._id 
+
+  return Todo.findOne({ _id, userId })
     .lean()
     .then(todo => res.render('detail', { todo }))
     .catch(error => console.log(error))
@@ -104,8 +118,10 @@ router.get('/:id', (req, res) => {
 
 // delete any of id 
 router.delete('/:id', (req, res) => {
-  const id = req.params.id
-  return Todo.findById(id)
+  const _id = req.params.id
+  const userId = req.user._id 
+
+  return Todo.findOne({ _id, userId })
     .then(todo => todo.remove())
     .then(() => res.redirect('/'))
     .catch(error => console.log(error))
