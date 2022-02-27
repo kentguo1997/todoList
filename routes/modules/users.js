@@ -18,6 +18,7 @@ router.get('/login', (req, res) => {
 // 使用middleware passport提供的 authenticate 方法執行驗證request的登入狀態
 router.post('/login', passport.authenticate('local', {
   successRedirect: '/',
+  failureFlash: true,
   failureRedirect: '/users/login'
 }))
 

@@ -15,18 +15,18 @@ module.exports = app => {
   app.use(passport.session()) 
   
   // 設定登入策略(選擇本地)
-  passport.use(new LocalStrategy( { usernameField: 'email' }, (email, password, done) => {
+  passport.use(new LocalStrategy( { usernameField: 'email', passReqToCallback: true }, (req, email, password, done) => {
     User.findOne({ email })
       .then(user => {
         if (!user) {
-          return done(null, false, { message: 'That email is not registered!' })
+          return done(null, false, req.flash('error', 'User not found!'))
         }
         if (user.password !== password) {
-          return done(null, false, { message: 'Email or Password incorrect' } )
+          return done(null, false, req.flash('error', 'Email or Password incorrect!'))
         }
         return done(null, user)
       })
-      .catch(error => done(err, false))
+      .catch(error => done(error, false))
   }))
   
   // 重點:

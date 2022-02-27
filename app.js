@@ -63,6 +63,7 @@ app.use((req, res, next) => {
   // 設定了兩組參數 success_msg 和 warning_msg，透過 req.flash到res.locals 的接力，最後再傳到view templates供前端樣板使用(因為res.locals當中存取的變數是所有樣板都可以使用的變數)：
   res.locals.success_msg = req.flash('success_msg') // 設定 success_msg 訊息
   res.locals.warning_msg = req.flash('warning_msg') // 設定 warning_msg 訊息
+  res.locals.error = req.flash('error')
   next()
 })
 
