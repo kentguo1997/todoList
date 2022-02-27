@@ -2,6 +2,8 @@
   <div class="col-md-6 m-auto">
     <div class="card card-body">
       <h1 class="text-center mt-3">Register</h1>
+      {{!-- 這是 Handlebars 提供的一種固定寫法，只要看到大於符號 >，Handlebars 就會去 partials 資料夾下尋找符合名稱的樣板，可以用這種方式，把樣板也封裝成可重覆運用的模組。 --}}
+      {{> message}}
       <form action="/users/register" method="POST">
         <div class="form-group mt-3 mb-2">
           <label for="name">Name</label>

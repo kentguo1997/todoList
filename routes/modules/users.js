@@ -34,38 +34,62 @@ router.post('/register', (req, res) => {
   // get parameters from req.body
   const { name, email, password, confirmPassword } = req.body
   
+  // get flash error message  
+  const errors = []
+  
+  // determine if the error situation exists 
+  if ( !name || !email || !password || !confirmPassword ) {
+    errors.push({ message: 'Please fill out the form!' })
+  }
+  
+  if ( password !== confirmPassword ) {
+    errors.push({ message: 'Password and Confirm Password do not match!' })
+  }
+
+  if (errors.length) {
+    return res.render('register', {
+      errors,
+      name,
+      email,
+      password,
+      confirmPassword
+    })
+  }
+
   // determine if the user has already registered 
   User.findOne({email})
     .then ( user => {
       
       // already exists
       if (user) {
-        console.log('User already exists!')
-        res.render('register', {
+        errors.push({ message: 'User Already exists!' })
+        return  res.render('register', {
           // show the contents user just input for check 
+          errors,
           name,
           email,
           password,
           confirmPassword
         })
-      } else {
-        // new user
-        const newUser = new User({
-          name,
-          email,
-          password
-        })
+      } 
+      // new user
+      const newUser = new User({
+        name,
+        email,
+        password
+      })
 
-        newUser.save()
+      newUser.save()
         .then(() => res.redirect('/'))
-        .catch (error => console.log(error))
-      }
+        .catch(error => console.log(error))  
+      
     })
 })
 
 
 router.get('/logout', (req, res) => {
   req.logout()  // req.logout() 是 Passport.js 提供的函式，會幫你清除 session
+  req.flash('success_msg', 'Logged Out Successfully!')
   res.redirect('/users/login')        // 登出之後，我們就把使用者帶回登入頁面。
 })
 

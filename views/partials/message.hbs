@@ -1,0 +1,25 @@
+{{!-- 提示框元件(在partials裡新增共用的局部樣板) --}}
+{{!-- Bootstrap 的 Alert 元件 (可以按 X 取消的 Dismissing 樣式) --}}
+
+{{#if success_msg}}
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{success_msg}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+{{/if}}
+
+{{#if warning_msg}}
+  <div class="alert alert-warning alert-dismissible fade show" role="alert">
+    {{warning_msg}}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+{{/if}}
+
+{{#if errors}}
+  {{#each errors}}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      {{ this.message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {{/each}}
+{{/if}}

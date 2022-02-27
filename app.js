@@ -6,6 +6,8 @@ const usePassport = require('./config/passport') // 匯入Passport設定檔 : �
 const exphbs = require('express-handlebars')
 const bodyParser = require('body-parser')
 const methodOverride = require('method-override')
+const flash = require('connect-flash')
+
 
 require('./config/mongoose') // 對 app.js 而言，Mongoose 連線設定只需要「被執行」，不需要接到任何回傳參數繼續利用，所以這裡不需要再設定變數。
 const routes = require('./routes')    // Include routes (index.js) (引入路由器時，路徑設定為 /routes 就會自動去尋找目錄下叫做 index 的檔案。)
@@ -50,12 +52,20 @@ usePassport(app)
 // 注意: passport.js輸出的是一個函式, 所以使用函式的方法來呼叫它, 並將上面已存取express框架的app伺服器作為必要參數代入
 
 
+// setting connect-flash to show flash message to users
+// (基本上 connect-flash 必須搭配 cookie & session 才能夠使用, 所以放在express-session設定的後面比較好)
+app.use(flash())
+
 // use res.locals to switch nav bar depends on user authentication
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.isAuthenticated
   res.locals.user = req.user
+  // 設定了兩組參數 success_msg 和 warning_msg，透過 req.flash到res.locals 的接力，最後再傳到view templates供前端樣板使用(因為res.locals當中存取的變數是所有樣板都可以使用的變數)：
+  res.locals.success_msg = req.flash('success_msg') // 設定 success_msg 訊息
+  res.locals.warning_msg = req.flash('warning_msg') // 設定 warning_msg 訊息
   next()
 })
+
 
 // 重點: (要交接給 res，我們才能在前端樣板裡使用這些資訊。)
 // res.locals.isAuthenticated：把 req.isAuthenticated() 回傳的布林值，交接給 res 使用
