@@ -1,6 +1,11 @@
+// Passport 是負責登入的 middleware
+
 // Include Passport & Passport LocalStrategy Module
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
+
+// Include bcrypt for encrypting password
+const bcrypt = require('bcryptjs')
 
 // Include User Model
 const User = require('../models/user')
@@ -21,10 +26,14 @@ module.exports = app => {
         if (!user) {
           return done(null, false, req.flash('error', 'User not found!'))
         }
-        if (user.password !== password) {
-          return done(null, false, req.flash('error', 'Email or Password incorrect!'))
-        }
-        return done(null, user)
+        // bcrypt 本身提供了 bcrypt.compare 方法，用來判斷使用者登入時輸入的密碼，是否與資料庫裡的雜湊值(註冊時經由hash處理的值)一致。
+        // bcrypt.compare(password, user.password) 的第一個參數是使用者的輸入值，而第二個參數是資料庫裡的雜湊值，bcrypt 會幫我們做比對，並回傳布林值，在文中我們用 isMatch 來代表。
+        return bcrypt.compare(password, user.password).then(isMatch => {
+          if (!isMatch) {
+            return done(null, false, req.flash('error', 'Email or Password incorrect!'))
+          }
+          return done(null, user)
+        })
       })
       .catch(error => done(error, false))
   }))
