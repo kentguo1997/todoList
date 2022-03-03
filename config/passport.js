@@ -3,6 +3,7 @@
 // Include Passport & Passport LocalStrategy Module
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
+const FacebookStrategy = require('passport-facebook').Strategy
 
 // Include bcrypt for encrypting password
 const bcrypt = require('bcryptjs')
@@ -43,6 +44,46 @@ module.exports = app => {
   // 2. 在 new LocalStractegy 的時候，多傳了第一個參數 { usernameField: 'email' }，把驗證項目從預設的 username 改成 email。
   // 3. 為錯誤情況客製了提示訊息，後面會再把這些訊息搬進前端畫面 
   // 4. 比對密碼的部分，官方設定的 user.verifyPassword(password) 只是舉例，假設你曾經在 User model 裡定義一個叫 verifyPassword 的方法，而我們並沒有定義這個方法，這邊暫時寫 user.password !== password，後面和密碼驗證有關的設定都會再優化
+  
+  
+  // 設定登入策略(選擇facebook)
+  passport.use(new FacebookStrategy({
+    clientID: process.env.FACEBOOK_ID,
+    clientSecret: process.env.FACEBOOK_SECRET,
+    callbackURL: process.env.FACEBOOK_CALLBACK,
+    profileFields: ['email', 'displayName']
+  }, (accessToken, refreshToken, profile, done) =>  {
+    const { name, email } = profile._json
+    User.findOne({ email })
+      .then(user => {
+        if(user)  return done(null, user)
+        const randomPassword = Math.random().toString(36).slice(-8)
+        bcrypt  
+          .genSalt(10)
+          .then(salt => bcrypt.hash(randomPassword, salt))
+          .then(hash => User.create({
+            name,
+            email,
+            password: hash
+          }))
+          .then(user => done(null, user))
+          .catch(err => done(err, false))
+      })      
+  }))
+
+  // 重點 : (FacebookStrategy() 的前三個參數是應用程式設定)
+  // 1. clientID: FACEBOOK_APP_ID - 請把值改成你的「應用程式編號」
+  // 2. clientSecret: FACEBOOK_APP_SECRET - 請把值改成你的「應用程式密鑰」
+  // 3. callbackURL: "http://localhost:3000/auth/facebook/callback"`- 在用戶端 OAuth 設定的重新導向 URI，直接保留即可
+  // 4. profileFields: 這個設定是和 Facebook 要求開放的資料，我們要了兩種資料：
+  // email：這是必要的，需要拿回來當成帳號
+  // displayName：Facebook 上的公開名稱，也許能和 User 的 name 屬性對應起來
+  // 5. 由於屬性 password 有設定必填，我們還是需要幫使用 Facebook 註冊的使用者製作密碼。因此這裡刻意設定一串亂碼。(randomPassword)
+  // Math.random() - 先用產生一個 0-1 的隨機小數，例如 0.3767988078359976
+  // .toString(36) - 運用進位轉換將 0.3767988078359976 變成英數參雜的亂碼。這裡選用 36 進位，是因為 36 是 10 個數字 (0, 1, 2, ... 9) 加上 26 個英文字母 (a, b, c, ... , x, y, z) 的總數，在 36 進位裡剛好可以取得所有的英數字母。此時的回傳結果可能是'0dkbxb14fqq4'
+  // slice(-8) - 最後，截切字串的最後一段，得到八個字母，例如 'xb14fqq4'
+
+
 
 
   // 設定序列化與反序列化

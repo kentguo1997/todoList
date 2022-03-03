@@ -1,8 +1,8 @@
 // Include mongoose
 const mongoose = require('mongoose')
 
-// setting MONGODB URI (set on heroku) for web and local MONGODB for local use
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost/todo_list'
+// setting MONGODB URI (set on heroku) for use (getting data from .env)
+const MONGODB_URI = process.env.MONGODB_URI
 
 // setting connection to mongoDB
 mongoose.connect(MONGODB_URI)
