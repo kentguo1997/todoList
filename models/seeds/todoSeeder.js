@@ -1,18 +1,52 @@
-// Include mongoose.js for connection to db
+// Include Packages
+const bcrypt = require('bcryptjs')
+
+// 由於我們把 MongoDB 連線搬進了 .env 裡，
+// 需要在一開始載入 .env 的檔案, 來供config/mongoose.js來使用
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+
+const Todo = require('../todo')
+const User = require('../user')
+
 const db = require('../../config/mongoose')
 
-// Include todo model
-const Todo = require('../todo') 
-
+// define a seed_user
+const SEED_USER = {
+  name: 'root',
+  email: 'root@example.com',
+  password: '12345678'
+}
+ 
 
 // once database connected 
 db.once('open', () => {
-  // Create data (the thing that has not defined in mongoose.js)
-  for (let i = 0; i < 10; i++) {
-    Todo.create({ name: `name-${i}` })  
-  }
+  // Create SEED_USER first
+  bcrypt
+    .genSalt(10)
+    .then(salt => bcrypt.hash(SEED_USER.password, salt))
+    .then(hash => User.create({
+      name: SEED_USER.name,
+      email: SEED_USER.email,
+      password: hash
+    }))
+    .then(user => {
+      const userId = user._id
+      // Use Promise.all to create data (corresponding to SEED_USER)
+      return Promise.all(Array.from(
+        { length: 10 },
+        (_, i) => Todo.create({ name: `name-${i}`, userId })
+      ))
+    })
+    .then(() => {
+      console.log('done.')
+      process.exit()
+      // process.exit() 指「關閉這段 Node 執行程序」，由於這段 seeder 程式只有在第一次初始化時才會用到，不像專案主程式一旦開始就執行運作，所以在 seeder 做好以後要把這個臨時的 Node.js 程序結束掉。類似把這個臨時的 Node.js 執行環境「關機」的概念。
 
-  console.log('data created.')
+      // 非同步處理
+      // 
+    })
 })
 
 
