@@ -18,10 +18,10 @@ module.exports = app => {
   // 初始化 Passport 模組
   // (這些 app.use 等初始化動作，以前都習慣寫在 app.js 裡，這裡由於建立了專門的 passport 設定檔，我們就拉到設定檔裡來統一管理。)
   app.use(passport.initialize())
-  app.use(passport.session()) 
-  
+  app.use(passport.session())
+
   // 設定登入策略(選擇本地)
-  passport.use(new LocalStrategy( { usernameField: 'email', passReqToCallback: true }, (req, email, password, done) => {
+  passport.use(new LocalStrategy({ usernameField: 'email', passReqToCallback: true }, (req, email, password, done) => {
     User.findOne({ email })
       .then(user => {
         if (!user) {
@@ -38,27 +38,26 @@ module.exports = app => {
       })
       .catch(error => done(error, false))
   }))
-  
+
   // 重點:
   // 1. 把 callback 語法改寫成 Promise 風格，也就是在資料庫操作後加上 .then，並且把錯誤處理移到 .catch 裡
   // 2. 在 new LocalStractegy 的時候，多傳了第一個參數 { usernameField: 'email' }，把驗證項目從預設的 username 改成 email。
-  // 3. 為錯誤情況客製了提示訊息，後面會再把這些訊息搬進前端畫面 
+  // 3. 為錯誤情況客製了提示訊息，後面會再把這些訊息搬進前端畫面
   // 4. 比對密碼的部分，官方設定的 user.verifyPassword(password) 只是舉例，假設你曾經在 User model 裡定義一個叫 verifyPassword 的方法，而我們並沒有定義這個方法，這邊暫時寫 user.password !== password，後面和密碼驗證有關的設定都會再優化
-  
-  
+
   // 設定登入策略(選擇facebook)
   passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_ID,
     clientSecret: process.env.FACEBOOK_SECRET,
     callbackURL: process.env.FACEBOOK_CALLBACK,
     profileFields: ['email', 'displayName']
-  }, (accessToken, refreshToken, profile, done) =>  {
+  }, (accessToken, refreshToken, profile, done) => {
     const { name, email } = profile._json
     User.findOne({ email })
       .then(user => {
-        if(user)  return done(null, user)
+        if (user) return done(null, user)
         const randomPassword = Math.random().toString(36).slice(-8)
-        bcrypt  
+        bcrypt
           .genSalt(10)
           .then(salt => bcrypt.hash(randomPassword, salt))
           .then(hash => User.create({
@@ -68,7 +67,7 @@ module.exports = app => {
           }))
           .then(user => done(null, user))
           .catch(err => done(err, false))
-      })      
+      })
   }))
 
   // 重點 : (FacebookStrategy() 的前三個參數是應用程式設定)
@@ -82,9 +81,6 @@ module.exports = app => {
   // Math.random() - 先用產生一個 0-1 的隨機小數，例如 0.3767988078359976
   // .toString(36) - 運用進位轉換將 0.3767988078359976 變成英數參雜的亂碼。這裡選用 36 進位，是因為 36 是 10 個數字 (0, 1, 2, ... 9) 加上 26 個英文字母 (a, b, c, ... , x, y, z) 的總數，在 36 進位裡剛好可以取得所有的英數字母。此時的回傳結果可能是'0dkbxb14fqq4'
   // slice(-8) - 最後，截切字串的最後一段，得到八個字母，例如 'xb14fqq4'
-
-
-
 
   // 設定序列化與反序列化
   // serialize (從資料庫中找到完整user物件, 把 user id 存入 session)
@@ -107,6 +103,4 @@ module.exports = app => {
   // 2. 錯誤處理的地方，其實 Passport 看到第一個參數有 err 就不會處理後面的參數了，但我們放一個 null 在語義上明確表達 user 是空的
   // 3. 從資料庫拿出來的物件，很可能會傳進前端樣板，因此遵從 Handlebars 的規格，先用 .lean() 把資料庫物件轉換成 JavaScript 原生物件。
   // 4. 透過serialize/deserialize，我們可以節省 session 的空間。
-
-
 }

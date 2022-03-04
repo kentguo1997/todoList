@@ -6,7 +6,7 @@ const MONGODB_URI = process.env.MONGODB_URI
 
 // setting connection to mongoDB
 mongoose.connect(MONGODB_URI)
-// getting connection status from database to store in db variable 
+// getting connection status from database to store in db variable
 const db = mongoose.connection
 
 // when database connection's error happens

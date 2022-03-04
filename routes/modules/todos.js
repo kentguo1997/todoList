@@ -6,7 +6,6 @@ const router = express.Router()
 // Include Todo model
 const Todo = require('../../models/todo')
 
-
 // Define routes('/todos')
 // 注意: 因為'/todos'的路由結構是重複的, 且已經在index.js當中設定針對'/todos'路由的處理了, 所以只需要寫出/todos之後的路由出來就可以了
 
@@ -18,11 +17,10 @@ router.get('/new', (req, res) => {
 // CRUD中的C (Create)
 // new.hbs中的form action="/todos" method="POST"的路由
 router.post('/', (req, res) => {
-  
   const name = req.body.name
-  const userId = req.user._id   
+  const userId = req.user._id
 
-  return Todo.create({ name, userId }) 
+  return Todo.create({ name, userId })
     .then(() => res.redirect('/')) // 新增完成後導回首頁
     .catch(error => console.error(error))
 })
@@ -32,15 +30,12 @@ router.post('/', (req, res) => {
 // return todo.save() 將該實例存入資料庫
 // 兩者的意義不太一樣，不過就「新增一筆資料」來說，都會達成相同結果。這裡我們最後選用作法一，因為看起來步驟比較少。後面「編輯資料」時就必須要採用作法二，我們之後再討論。
 
-
-
-
 // Edit any of todos
 router.get('/:id/edit', (req, res) => {
   const _id = req.params.id
-  const userId = req.user._id 
+  const userId = req.user._id
 
-  return Todo.findOne( {_id, userId} )
+  return Todo.findOne({ _id, userId })
     .lean()
     .then(todo => res.render('edit', { todo }))
     .catch(error => console.log(error))
@@ -49,17 +44,14 @@ router.get('/:id/edit', (req, res) => {
 
   // 要把原本的 Todo.findById(id) 改成 Todo.findOne({ _id, userId })，才能串接多個條件。(改用 findOne 之後，Mongoose 就不會自動幫我們轉換 id 和 _id，所以這裡要寫和資料庫一樣的屬性名稱，也就是 _id。)
   // 邏輯解析: 先找出_id一樣的todo, 確保這筆todo屬於目前登入的user(double check的概念) 這樣就會找出「_id 和網址參數一樣，而且屬於目前登入使用者的 todo」。
-
 })
 
-
 // 首先要用 req.params.id 把網址上的 id 截取出來，有了 id 之後，就能使用 Todo.findById() 來查詢資料庫。找出資料以後，因為要傳給前端樣板，記得加上 .lean()。若成功找到資料，就把資料傳給 view 引擎，並且指定使用 edit 樣板，view 引擎就能幫我們組合出「帶有資料的 HTML 樣板」。
-
 
 // CRUD 的 Update的動作 (暫時使用post來做)
 router.put('/:id', (req, res) => {
   const _id = req.params.id
-  const userId = req.user._id 
+  const userId = req.user._id
 
   // 使用者新輸入的資料 (結構賦值)
   // 「解構賦值 (destructuring assignment)」:主要就是想要把物件裡的屬性一項項拿出來存成變數時，可以使用的一種縮寫：
@@ -90,13 +82,10 @@ router.put('/:id', (req, res) => {
 // Todo.create() v.s. todo.save() : 前者是操作整份資料，後者是針對單一資料。在「新增資料」時兩種作法都可以，而這次因為搭配的資料操作是 Todo.findById，這個方法只會返回一筆資料，所以後面需要接 todo.save() 針對這一筆資料進行儲存，而非操作整份資料。
 // 記住是在res.render的時候要使用.lean(), 上述Updete的情況不需要使用(若使用的話, 反而無法執行接下來的todo.save()指令)
 
-
-
-
 // show details of every to-do
 router.get('/:id', (req, res) => {
   const _id = req.params.id
-  const userId = req.user._id 
+  const userId = req.user._id
 
   return Todo.findOne({ _id, userId })
     .lean()
@@ -113,13 +102,10 @@ router.get('/:id', (req, res) => {
 // 3. 這裡撈出來的資料也需要傳給樣板使用，所以要用 lean() 把資料整理乾淨。別忘了我們的口訣：「撈資料以後想用 res.render()，就要先用 .lean()」。
 // 4. 到 .then() 這段拿到資料了，資料會被存在 todo 變數裡，傳給樣板引擎，請 Handlebars 幫忙組裝 detail 頁面。
 
-
-
-
-// delete any of id 
+// delete any of id
 router.delete('/:id', (req, res) => {
   const _id = req.params.id
-  const userId = req.user._id 
+  const userId = req.user._id
 
   return Todo.findOne({ _id, userId })
     .then(todo => todo.remove())
@@ -130,10 +116,7 @@ router.delete('/:id', (req, res) => {
 // step 1. 透過 req.params.id 取得網址上的識別碼，用來查詢使用者想刪除的 To-do。
 // step 2. 使用 Todo.findById 查詢資料，資料庫查詢成功以後，會把資料放進 todo。
 // step 3. 用 todo.remove() 刪除這筆資料。
-// step 4. 成功刪除以後，使用 redirect 重新呼叫首頁，此時會重新發送請求給 GET /，進入到另一條路由。 
-
-
-
+// step 4. 成功刪除以後，使用 redirect 重新呼叫首頁，此時會重新發送請求給 GET /，進入到另一條路由。
 
 // Export module
 module.exports = router

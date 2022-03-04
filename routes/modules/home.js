@@ -4,25 +4,21 @@
 const express = require('express')
 const router = express.Router()
 // Include Todo model
-const Todo  = require('../../models/todo')
-
+const Todo = require('../../models/todo')
 
 // Define route of homepage
 router.get('/', (req, res) => {
-  const userId = req.user._id  // 變數設定(Passport會把反序列化後得到的user存在req.user當中)
+  const userId = req.user._id // 變數設定(Passport會把反序列化後得到的user存在req.user當中)
   // 只尋找userId等於req.user._id的文件
-  Todo.find({ userId })    // options需要唯一物件, 所以要加上{}
+  Todo.find({ userId }) // options需要唯一物件, 所以要加上{}
     .lean()
-    .sort({ _id: 'asc' }) //根據每筆資料的_id(資料庫依據資料存入的資料庫的時間先後而幫忙自動產生的)屬性進行升冪排序
+    .sort({ _id: 'asc' }) // 根據每筆資料的_id(資料庫依據資料存入的資料庫的時間先後而幫忙自動產生的)屬性進行升冪排序
     .then(todos => res.render('index', { todos }))
     .catch(error => console.error(error))
 })
 
-
 // Export module
 module.exports = router
-
-
 
 // 程式碼重點:
 // 每個用 . 串接的方法都是按順序進行，一個步驟完成以後才會進入下一步，除非遇到錯誤才會跳到 .catch。

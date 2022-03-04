@@ -18,9 +18,8 @@ const SEED_USER = {
   email: 'root@example.com',
   password: '12345678'
 }
- 
 
-// once database connected 
+// once database connected
 db.once('open', () => {
   // Create SEED_USER first
   bcrypt
@@ -43,15 +42,8 @@ db.once('open', () => {
       console.log('done.')
       process.exit()
       // process.exit() 指「關閉這段 Node 執行程序」，由於這段 seeder 程式只有在第一次初始化時才會用到，不像專案主程式一旦開始就執行運作，所以在 seeder 做好以後要把這個臨時的 Node.js 程序結束掉。類似把這個臨時的 Node.js 執行環境「關機」的概念。
-
-      // 非同步處理
-      // 
     })
 })
-
-
-
-
 
 // 在 models 資料夾新增一個命名為 seeds 的資料夾，這個資料夾專門用來管理種子資料腳本，現在只有一個腳本，讓我們命名為 todoSeeder.js，顧名思義，這份檔案裡會放置和「待辦事項」有關的種子資料，而 seeder 就是「種子資料產生器」的意思。
 // step 1. 設定資料庫連線 (把 app.js 裡和「資料庫連線」有關的程式碼都複製過來一份，另外，也要一併載入 Todo model，因為這裡要操作的資料和 Todo 有關。)
